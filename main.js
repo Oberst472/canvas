@@ -1,43 +1,54 @@
 import './style.css'
-
+import items from './items'
 const mainCanvas = document.querySelector('[data-name=js-m-c]')
 const secondCanvas = document.querySelector('[data-name=js-s-c]')
 
-const ctx = mainCanvas.getContext("2d")
+const ctx = mainCanvas.getContext('2d')
 mainCanvas.width = 600
 mainCanvas.height = 600
 
 class Star {
-    constructor({ctx, color, offsetX, offsetY}) {
+    constructor(ctx) {
         this.ctx = ctx
-        this.color = color
-        this.offsetX = offsetX
-        this.offsetY = offsetY
     }
-    draw = () => {
-        console.log(7);
-        console.log(ctx);
-        console.log(this.ctx);
-        this.ctx.fillStyle = this.color;
-        this.ctx.beginPath();
-        this.ctx.moveTo(103 + this.offsetX, -5 + this.offsetY);
-        this.ctx.lineTo(136 + this.offsetX, 65 + this.offsetY);
-        this.ctx.lineTo(213 + this.offsetX, 73.3 + this.offsetY);
-        this.ctx.lineTo(157 + this.offsetX, 126 + this.offsetY);
-        this.ctx.lineTo(170 + this.offsetX, 200 + this.offsetY);
-        this.ctx.lineTo(103 + this.offsetX, 165 + this.offsetY);
-        this.ctx.lineTo(36.2 + this.offsetX, 200 + this.offsetY);
-        this.ctx.lineTo(50 + this.offsetX, 126 + this.offsetY);
-        this.ctx.lineTo(-4 + this.offsetX, 73 + this.offsetY);
-        this.ctx.lineTo(70 + this.offsetX, 63 + this.offsetY);
-        this.ctx.lineTo(103 + this.offsetX, -5 + this.offsetY);
-        this.ctx.closePath();
-        this.ctx.fill();
+    draw = ({offsetX, offsetY, color}) => {
+        let rot = Math.PI / 2 * 3
+        let x = offsetX
+        let y = offsetY
+        let step = Math.PI / 5
+        const el = new Path2D()
+        this.ctx.fillStyle = color
+        this.ctx.beginPath()
+        this.ctx.moveTo(offsetX, offsetY - 100)
+        el.moveTo(offsetX, offsetY - 100)
+
+        for (let i = 0; i < 5; i++) {
+            x = offsetX + Math.cos(rot) * 100
+            y = offsetY + Math.sin(rot) * 100
+            this.ctx.lineTo(x, y)
+            rot += step
+            el.lineTo(x, y)
+
+            x = offsetX + Math.cos(rot) * 40
+            y = offsetY + Math.sin(rot) * 40
+            this.ctx.lineTo(x, y)
+            el.lineTo(x, y)
+            rot += step
+        }
+        this.ctx.lineTo(offsetX, offsetY - 100)
+        this.ctx.closePath()
+        this.ctx.lineWidth = 5
+        this.ctx.strokeStyle = color
+        this.ctx.stroke()
+        this.ctx.fill()
     }
 }
 
-const star1 = new Star({ctx, color: 'blue', offsetX: 0, offsetY: 4})
-star1.draw()
+items.forEach((item) => {
+    new Star(ctx).draw(item)
+})
 
-const star2 = new Star({ctx, color: 'green', offsetX: 206, offsetY: 4})
-star2.draw()
+mainCanvas.addEventListener('click', (e) => {
+    const img_data = ctx.getImageData(e.offsetX, e.offsetY, 1, 1)
+    secondCanvas.style.backgroundColor = `rgba(${img_data.data.join(',')})`
+})
