@@ -1,54 +1,54 @@
 import './style.css'
 import items from './items'
-const mainCanvas = document.querySelector('[data-name=js-m-c]')
-const secondCanvas = document.querySelector('[data-name=js-s-c]')
+const app = document.querySelector('#app')
 
-const ctx = mainCanvas.getContext('2d')
-mainCanvas.width = 600
-mainCanvas.height = 600
-
-class Star {
+class Canvas {
+    constructor(app, width, height) {
+        this.rootEl = app
+        this.width = width
+        this.height = height
+    }
+    create = () => {
+        this.el = document.createElement('canvas')
+        this.el.width = this.width
+        this.el.height = this.height
+        this.rootEl.appendChild(this.el)
+        this.ctx = this.el.getContext('2d')
+    }
+}
+class Star extends Canvas{
     constructor(ctx) {
+        super()
         this.ctx = ctx
     }
     draw = ({offsetX, offsetY, color}) => {
-        let rot = Math.PI / 2 * 3
-        let x = offsetX
-        let y = offsetY
-        let step = Math.PI / 5
-        const el = new Path2D()
+        let r = Math.PI / 2 * 3
+        const obj = {x: offsetX, y: offsetY}
         this.ctx.fillStyle = color
         this.ctx.beginPath()
         this.ctx.moveTo(offsetX, offsetY - 100)
-        el.moveTo(offsetX, offsetY - 100)
 
         for (let i = 0; i < 5; i++) {
-            x = offsetX + Math.cos(rot) * 100
-            y = offsetY + Math.sin(rot) * 100
-            this.ctx.lineTo(x, y)
-            rot += step
-            el.lineTo(x, y)
-
-            x = offsetX + Math.cos(rot) * 40
-            y = offsetY + Math.sin(rot) * 40
-            this.ctx.lineTo(x, y)
-            el.lineTo(x, y)
-            rot += step
+            [100, 40].forEach(item => {
+                obj.x = offsetX + Math.cos(r) * item
+                obj.y = offsetY + Math.sin(r) * item
+                this.ctx.lineTo(obj.x, obj.y)
+                r += Math.PI / 5
+            })
         }
-        this.ctx.lineTo(offsetX, offsetY - 100)
-        this.ctx.closePath()
-        this.ctx.lineWidth = 5
-        this.ctx.strokeStyle = color
-        this.ctx.stroke()
         this.ctx.fill()
     }
 }
 
-items.forEach((item) => {
-    new Star(ctx).draw(item)
-})
+const MainCanvas = new Canvas(app, 600, 600)
+const SecondCanvas = new Canvas(app, 600, 50)
+MainCanvas.create()
+SecondCanvas.create()
 
-mainCanvas.addEventListener('click', (e) => {
-    const img_data = ctx.getImageData(e.offsetX, e.offsetY, 1, 1)
-    secondCanvas.style.backgroundColor = `rgba(${img_data.data.join(',')})`
+
+items.forEach(item => new Star(MainCanvas.ctx).draw(item))
+
+MainCanvas.el.addEventListener('click', (e) => {
+    const img_data = MainCanvas.ctx.getImageData(e.offsetX, e.offsetY, 1, 1)
+    SecondCanvas.el.style.backgroundColor = `rgba(${img_data.data.join(',')})`
 })
